@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import Navbar from "./components/Navbar";
 import Search from "./components/Search";
+import Spinner from "./components/Spinner";
+import MovieCard from "./components/MovieCard";
+import { Link, useNavigate } from "react-router";
 
 const API_BASE_URL = "https://api.themoviedb.org/3";
 
@@ -19,6 +22,7 @@ function App() {
   const [errorMessage, setErrorMessage] = useState("");
   const [movieList, setMovieList] = useState([]);
   const [isLoading, setisLoading] = useState(false);
+  const navigate = useNavigate();
 
   const fetchMovies = async () => {
     setisLoading(true);
@@ -40,8 +44,9 @@ function App() {
         return;
       }
 
-      setMovieList(data.result || []);
-      // console.log(movieList);
+      setMovieList(data.results || []);
+      console.log(movieList);
+      console.log(data);
     } catch (error) {
       console.error(`Error fetching movies: ${error}`);
       setErrorMessage("Error fetching movies. Please try again later.");
@@ -50,28 +55,48 @@ function App() {
     }
   };
 
-  useEffect(() => {}, []);
-  fetchMovies();
+  useEffect(() => {
+    fetchMovies();
+  }, []);
+
+  const handleDetailEvent = (id) => {
+    navigate(`/detail/${id}`);
+  };
+
   return (
     <>
-      <Navbar />
+      {/* <Navbar /> */}
       <div className="pattern">
         <div className="wrapper">
           <header>
             {/* <img src="hero.png" alt="" /> */}
             <img src="kymovie_logo.png" alt="hero" className="h-100" />
+            <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
             <h1>
               Find <span className="text-gradient">Movies</span> You'll Enjoy
               Without The Hassle
             </h1>
-            <h1 className="text-white">{searchTerm}</h1>x
-            <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+            <h1 className="text-white">{searchTerm}</h1>
           </header>
 
           <section className="all-movies">
             <h2>All Movies</h2>
 
-            {errorMessage && <p className="text-red-500">{errorMessage}</p>}
+            {isLoading ? (
+              <Spinner />
+            ) : errorMessage ? (
+              <p className="text-red-500">{errorMessage}</p>
+            ) : (
+              <ul>
+                {movieList.map((movie) => (
+                  <MovieCard
+                    key={movie.id}
+                    movie={movie}
+                    handleDetail={handleDetailEvent}
+                  />
+                ))}
+              </ul>
+            )}
           </section>
         </div>
       </div>
