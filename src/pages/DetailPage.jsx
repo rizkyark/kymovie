@@ -14,6 +14,7 @@ const API_OPTIONS = {
 };
 
 function DetailPage() {
+  document.title = "Movie Details";
   const [errorMessage, setErrorMessage] = useState("");
   const [movieList, setMovieList] = useState([]);
   const params = useParams();
@@ -54,33 +55,34 @@ function DetailPage() {
   return (
     <>
       <div className="pattern">
-        <div className="wrapper"></div>
-        <div className="card lg:card-side bg-base-100 shadow-sm sm:mx-20 my-10">
-          <figure>
-            <img
-              src={
-                movieList?.poster_path
-                  ? `https://image.tmdb.org/t/p/w500/${movieList?.poster_path}`
-                  : "/no-movie.png"
-              }
-              alt="Album"
-              // className="h-500 w-500 object-cover"
-              // style={{ maxWidth: "500px", maxHeight: "500px" }}
-            />
-          </figure>
+        <div className="wrapper">
+          <div className="card lg:card-side bg-base-100 shadow-sm sm:mx-20 my-10 mb-7">
+            <figure>
+              <img
+                src={
+                  movieList?.poster_path
+                    ? `https://image.tmdb.org/t/p/w500/${movieList?.poster_path}`
+                    : "/no-movie.png"
+                }
+                alt="Album"
+                // className="h-500 w-500 object-cover"
+                // style={{ maxWidth: "500px", maxHeight: "500px" }}
+              />
+            </figure>
 
-          <div className="card-body">
-            <h2 className="card-title">{movieList?.original_title}</h2>
-            <p className="pr-44">{movieList?.overview}</p>
-            <p>Release Date: {movieList?.release_date}</p>
-            <p>Language: {movieList?.original_language}</p>
-            <p>Rating: {movieList?.vote_average}</p>
-            <p>
-              Genres:{" "}
-              {movieList?.genres?.map((genre) => genre.name).join(" | ")}
-            </p>
-            <div className="card-actions justify-end">
-              <button className="btn btn-primary">Listen</button>
+            <div className="card-body">
+              <h2 className="card-title">{movieList?.original_title}</h2>
+              <p className="pr-44">{movieList?.overview}</p>
+              <p>Release Date: {movieList?.release_date}</p>
+              <p>Language: {movieList?.original_language}</p>
+              <p>Rating: {movieList?.vote_average}</p>
+              <p>
+                Genres:{" "}
+                {movieList?.genres?.map((genre) => genre.name).join(" | ")}
+              </p>
+              <div className="card-actions justify-end">
+                <button className="btn btn-primary">Listen</button>
+              </div>
             </div>
           </div>
         </div>

@@ -4,6 +4,7 @@ import Search from "./components/Search";
 import Spinner from "./components/Spinner";
 import MovieCard from "./components/MovieCard";
 import { Link, useNavigate } from "react-router";
+import { useAuth } from "./utils/AuthContext";
 
 const API_BASE_URL = "https://api.themoviedb.org/3";
 
@@ -18,11 +19,13 @@ const API_OPTIONS = {
 };
 
 function App() {
+  document.title = "KyMovie - Find Movies You'll Enjoy";
   const [searchTerm, setSearchTerm] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [movieList, setMovieList] = useState([]);
   const [isLoading, setisLoading] = useState(false);
   const navigate = useNavigate();
+  const { user, logoutUser } = useAuth();
 
   const fetchMovies = async () => {
     setisLoading(true);
@@ -57,6 +60,7 @@ function App() {
 
   useEffect(() => {
     fetchMovies();
+    // console.log(user.emailVerification);
   }, []);
 
   const handleDetailEvent = (id) => {
@@ -65,7 +69,7 @@ function App() {
 
   return (
     <>
-      {/* <Navbar /> */}
+      <Navbar />
       <div className="pattern">
         <div className="wrapper">
           <header>
