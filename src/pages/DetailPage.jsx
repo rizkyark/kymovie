@@ -17,6 +17,10 @@ function DetailPage() {
   document.title = "Movie Details";
   const [errorMessage, setErrorMessage] = useState("");
   const [movieList, setMovieList] = useState([]);
+  const [selectedTime, setSelectedTime] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [ticketCount, setTicketCount] = useState(1);
+  const [selectedDate, setSelectedDate] = useState(null);
   const params = useParams();
 
   const fetchMovies = async () => {
@@ -48,6 +52,30 @@ function DetailPage() {
     }
   };
 
+  // Helper untuk cek apakah jam sudah lewat
+  const isTimePassed = (timeStr) => {
+    const now = new Date();
+    const [h, m] = timeStr.split(":").map(Number);
+    const showTime = new Date(now);
+    showTime.setHours(h, m, 0, 0);
+    return now > showTime;
+  };
+
+  // Helper untuk membuat array 7 hari ke depan
+  const getNext7Days = () => {
+    const days = [];
+    const options = { weekday: "short", day: "numeric", month: "short" };
+    for (let i = 0; i < 7; i++) {
+      const d = new Date();
+      d.setDate(d.getDate() + i);
+      days.push({
+        date: d.toISOString().slice(0, 10),
+        label: d.toLocaleDateString("en-US", options),
+      });
+    }
+    return days;
+  };
+
   useEffect(() => {
     fetchMovies();
   }, []);
@@ -65,8 +93,6 @@ function DetailPage() {
                     : "/no-movie.png"
                 }
                 alt="Album"
-                // className="h-500 w-500 object-cover"
-                // style={{ maxWidth: "500px", maxHeight: "500px" }}
               />
             </figure>
 
@@ -80,13 +106,106 @@ function DetailPage() {
                 Genres:{" "}
                 {movieList?.genres?.map((genre) => genre.name).join(" | ")}
               </p>
-              <div className="card-actions justify-end">
-                <button className="btn btn-primary">Listen</button>
+              {/* Pilihan tanggal dan jam menonton */}
+              <div className="my-4">
+                <p className="font-semibold mb-2">Pilih Tanggal:</p>
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {getNext7Days().map((d) => (
+                    <button
+                      key={d.date}
+                      className={`btn btn-outline btn-sm ${
+                        selectedDate === d.date ? "btn-active" : ""
+                      }`}
+                      onClick={() => setSelectedDate(d.date)}
+                      type="button"
+                    >
+                      {d.label}
+                    </button>
+                  ))}
+                </div>
+                <p className="font-semibold mb-2">Pilih Jam Tayang:</p>
+                <div className="flex flex-wrap gap-2">
+                  {["10:00", "13:00", "16:00", "19:00", "21:30"].map((time) => (
+                    <button
+                      key={time}
+                      className="btn btn-outline btn-sm"
+                      onClick={() => {
+                        setSelectedTime(time);
+                        setShowModal(true);
+                      }}
+                      type="button"
+                      disabled={
+                        !selectedDate ||
+                        (selectedDate ===
+                          new Date().toISOString().slice(0, 10) &&
+                          isTimePassed(time))
+                      }
+                    >
+                      {time}
+                    </button>
+                  ))}
+                </div>
               </div>
+              {/* <div className="card-actions justify-end">
+                <button className="btn btn-primary">Listen</button>
+              </div> */}
             </div>
           </div>
         </div>
       </div>
+
+      {/* Modal Pilih Tiket */}
+      {showModal && (
+        <div className="fixed inset-0 flex items-center justify-center  z-50">
+          <div className="bg-gray-600 rounded-lg p-6 w-80 shadow-lg ">
+            <h3 className="text-lg font-semibold mb-4 text-center">
+              Pilih Jumlah Tiket
+            </h3>
+            <p className="mb-2 text-center">
+              Jam tayang: <span className="font-bold">{selectedTime}</span>
+            </p>
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <button
+                className="btn btn-sm"
+                onClick={() => setTicketCount((c) => Math.max(1, c - 1))}
+                type="button"
+              >
+                -
+              </button>
+              <span className="text-lg font-bold">{ticketCount}</span>
+              <button
+                className="btn btn-sm"
+                onClick={() => setTicketCount((c) => c + 1)}
+                type="button"
+              >
+                +
+              </button>
+            </div>
+            <div className="flex justify-between gap-2">
+              <button
+                className="btn btn-outline btn-sm flex-1"
+                onClick={() => setShowModal(false)}
+                type="button"
+              >
+                Cancel
+              </button>
+              <button
+                className="btn btn-primary btn-sm flex-1"
+                onClick={() => {
+                  setShowModal(false);
+                  // Tambahkan aksi konfirmasi di sini, misal redirect ke halaman pembayaran atau tampilkan notifikasi
+                  alert(
+                    `Tiket berhasil dipesan!\nJam: ${selectedTime}\nJumlah: ${ticketCount}`
+                  );
+                }}
+                type="button"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
