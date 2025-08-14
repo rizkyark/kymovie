@@ -1,6 +1,10 @@
 import "./SeatsPage.css";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import clsx from "clsx";
+
+import { useLocation, useNavigate } from "react-router-dom";
+import PaymentForm from "../../components/PaymentForm";
+import "../../components/PaymentForm.css";
 
 const movies = [
   {
@@ -28,11 +32,73 @@ const movies = [
 const seats = Array.from({ length: 8 * 8 }, (_, i) => i);
 
 export default function App() {
-  const [selectedMovie, setSelectedMovie] = useState(movies[0]);
+  // Ambil data dari state yang dikirim via navigate
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [detailData] = useState(location.state || {});
+  const [selectedMovie] = useState(movies[0]);
   const [selectedSeats, setSelectedSeats] = useState([]);
+  const [showPaymentForm, setShowPaymentForm] = useState(false);
+  // State gabungan detailData dan selectedSeats
+  const [bookingData, setBookingData] = useState({
+    ...detailData,
+    selectedSeats: [],
+  });
+
+  useEffect(() => {
+    setBookingData({
+      ...detailData,
+      selectedSeats: selectedSeats,
+    });
+    // console.log(bookingData);
+  }, [detailData, selectedSeats]);
+
+  const handlePaymentSuccess = (paymentResult) => {
+    alert(
+      `Payment successful!\nPayment ID: ${paymentResult.paymentId}\nAmount: $${paymentResult.amount}`
+    );
+    // Redirect ke halaman success atau home
+    navigate("/", {
+      state: {
+        paymentSuccess: true,
+        bookingData: bookingData,
+        paymentResult: paymentResult,
+      },
+    });
+  };
+
+  if (showPaymentForm) {
+    return (
+      <div className="App">
+        <PaymentForm
+          bookingData={bookingData}
+          selectedSeats={selectedSeats}
+          selectedMovie={selectedMovie}
+          onPaymentSuccess={handlePaymentSuccess}
+        />
+        <button
+          className="back-btn"
+          onClick={() => setShowPaymentForm(false)}
+          style={{
+            margin: "1rem auto",
+            display: "block",
+            padding: "0.5rem 1rem",
+            background: "#6c757d",
+            color: "white",
+            border: "none",
+            borderRadius: "5px",
+            cursor: "pointer",
+          }}
+        >
+          Back to Seat Selection
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="App">
+      <p>{JSON.stringify(bookingData)}</p>
       {/* <Movies
         movie={selectedMovie}
         onChange={(movie) => {
@@ -56,6 +122,15 @@ export default function App() {
           {selectedSeats.length * selectedMovie.price}$
         </span>
       </p>
+
+      {selectedSeats.length > 0 && (
+        <button
+          className="payment-btn"
+          onClick={() => setShowPaymentForm(true)}
+        >
+          Proceed to Payment (${selectedSeats.length * selectedMovie.price})
+        </button>
+      )}
     </div>
   );
 }
@@ -98,6 +173,11 @@ function ShowCase() {
 }
 
 function Cinema({ movie, selectedSeats, onSelectedSeatsChange }) {
+  // Ambil ticketCount dari detailData melalui closure
+  const location = useLocation();
+  const detailData = location.state || {};
+  const ticketCount = detailData.ticketCount || 1;
+
   function handleSelectedState(seat) {
     const isSelected = selectedSeats.includes(seat);
     if (isSelected) {
@@ -105,7 +185,13 @@ function Cinema({ movie, selectedSeats, onSelectedSeatsChange }) {
         selectedSeats.filter((selectedSeat) => selectedSeat !== seat)
       );
     } else {
-      onSelectedSeatsChange([...selectedSeats, seat]);
+      if (selectedSeats.length < ticketCount) {
+        onSelectedSeatsChange([...selectedSeats, seat]);
+      } else {
+        alert(
+          "You cannot select more seats than the number of tickets you ordered."
+        );
+      }
     }
   }
 

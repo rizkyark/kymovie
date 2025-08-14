@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router";
+import { useParams, useNavigate } from "react-router";
+import { useAuth } from "../utils/AuthContext";
 
 const API_BASE_URL = "https://api.themoviedb.org/3";
 
@@ -22,6 +23,8 @@ function DetailPage() {
   const [ticketCount, setTicketCount] = useState(1);
   const [selectedDate, setSelectedDate] = useState(null);
   const params = useParams();
+  const navigate = useNavigate();
+  const { user } = useAuth();
 
   const fetchMovies = async () => {
     setErrorMessage("");
@@ -98,7 +101,7 @@ function DetailPage() {
 
             <div className="card-body">
               <h2 className="card-title">{movieList?.original_title}</h2>
-              <p className="pr-44">{movieList?.overview}</p>
+              <p className="sm:pr-44 p-0">{movieList?.overview}</p>
               <p>Release Date: {movieList?.release_date}</p>
               <p>Language: {movieList?.original_language}</p>
               <p>Rating: {movieList?.vote_average}</p>
@@ -109,11 +112,11 @@ function DetailPage() {
               {/* Pilihan tanggal dan jam menonton */}
               <div className="my-4">
                 <p className="font-semibold mb-2">Pilih Tanggal:</p>
-                <div className="flex flex-wrap gap-2 mb-4">
+                <div className="flex flex-wrap gap-2 mb-4 min-w-[300px]">
                   {getNext7Days().map((d) => (
                     <button
                       key={d.date}
-                      className={`btn btn-outline btn-sm ${
+                      className={`btn btn-outline btn-sm min-w-[100px] ${
                         selectedDate === d.date ? "btn-active" : ""
                       }`}
                       onClick={() => setSelectedDate(d.date)}
@@ -154,7 +157,7 @@ function DetailPage() {
         </div>
       </div>
 
-      {/* Modal Pilih Tiket */}
+      {/* Choose Ticket Modal */}
       {showModal && (
         <div className="fixed inset-0 flex items-center justify-center  z-50">
           <div className="bg-gray-600 rounded-lg p-6 w-80 shadow-lg ">
@@ -193,10 +196,17 @@ function DetailPage() {
                 className="btn btn-primary btn-sm flex-1"
                 onClick={() => {
                   setShowModal(false);
-                  // Tambahkan aksi konfirmasi di sini, misal redirect ke halaman pembayaran atau tampilkan notifikasi
-                  alert(
-                    `Tiket berhasil dipesan!\nJam: ${selectedTime}\nJumlah: ${ticketCount}`
-                  );
+                  // Navigasi ke halaman seats dengan data yang dipilih
+                  navigate("/seats", {
+                    state: {
+                      id: params.id,
+                      userId: user?.$id || null,
+                      name: movieList?.original_title,
+                      date: selectedDate,
+                      time: selectedTime,
+                      ticketCount: ticketCount,
+                    },
+                  });
                 }}
                 type="button"
               >

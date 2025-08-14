@@ -60,7 +60,7 @@ function App() {
 
   useEffect(() => {
     fetchMovies();
-    // console.log(user.emailVerification);
+    // console.log(user);
   }, []);
 
   const handleDetailEvent = (id) => {
@@ -75,11 +75,11 @@ function App() {
           <header>
             {/* <img src="hero.png" alt="" /> */}
             <img src="kymovie_logo.png" alt="hero" className="h-100" />
-            <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
             <h1>
               Find <span className="text-gradient">Movies</span> You'll Enjoy
               Without The Hassle
             </h1>
+            <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
             <h1 className="text-white">{searchTerm}</h1>
           </header>
 

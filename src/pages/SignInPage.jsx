@@ -9,10 +9,8 @@ const SignInPage = () => {
   const loginForm = useRef(null);
 
   useEffect(() => {
-    if (user && user.emailVerification === true) {
+    if (user) {
       navigate("/");
-    } else if (user && user.emailVerification === false) {
-      navigate("/verification");
     }
   }, [user, navigate]);
 
