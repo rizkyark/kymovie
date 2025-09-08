@@ -1,4 +1,4 @@
-import "./SeatsPage.css";
+import "./seatsPage.css";
 import React, { useEffect, useState } from "react";
 import clsx from "clsx";
 
