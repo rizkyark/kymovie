@@ -5,18 +5,21 @@ const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
 export const createPaymentIntent = async (amount, currency = "usd") => {
   try {
-    // Dalam implementasi production, ini harus dipanggil ke backend Anda
-    // Untuk demo, kita simulasikan response dari backend
-    const response = await fetch("/api/create-payment-intent", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        amount: amount * 100, // Stripe menggunakan cents
-        currency,
-      }),
-    });
+    // Request ke backend Appwrite Function yang sudah disediakan
+    const response = await fetch(
+      "https://68b97a700016b80522b4.fra.appwrite.run/create-payment-intent",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          amount,
+          currency,
+          bookingData: arguments[2] || {},
+        }),
+      }
+    );
 
     const { client_secret } = await response.json();
     return client_secret;

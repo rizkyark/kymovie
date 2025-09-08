@@ -3,8 +3,8 @@ import React, { useEffect, useState } from "react";
 import clsx from "clsx";
 
 import { useLocation, useNavigate } from "react-router-dom";
-import PaymentForm from "../../components/PaymentForm";
-import "../../components/PaymentForm.css";
+// import PaymentForm from "../../components/PaymentForm";
+// import "../../components/PaymentForm.css";
 
 const movies = [
   {
@@ -38,7 +38,36 @@ export default function App() {
   const [detailData] = useState(location.state || {});
   const [selectedMovie] = useState(movies[0]);
   const [selectedSeats, setSelectedSeats] = useState([]);
-  const [showPaymentForm, setShowPaymentForm] = useState(false);
+  // const [showPaymentForm, setShowPaymentForm] = useState(false);
+  // Fungsi untuk handle pembayaran langsung ke Stripe
+  const handleStripeCheckout = async () => {
+    try {
+      // Kirim data booking ke backend untuk membuat Stripe Checkout Session
+      const response = await fetch(
+        "https://68b97a700016b80522b4.fra.appwrite.run",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            seats: selectedSeats,
+            movie: selectedMovie.name,
+            price: selectedMovie.price,
+            ...detailData,
+          }),
+        }
+      );
+      const data = await response.json();
+      if (data.url) {
+        window.location.href = data.url; // Redirect ke Stripe Checkout
+      } else {
+        alert("Gagal membuat sesi pembayaran Stripe.");
+      }
+    } catch (err) {
+      alert("Terjadi kesalahan saat memproses pembayaran.");
+    }
+  };
   // State gabungan detailData dan selectedSeats
   const [bookingData, setBookingData] = useState({
     ...detailData,
@@ -67,34 +96,34 @@ export default function App() {
     });
   };
 
-  if (showPaymentForm) {
-    return (
-      <div className="App">
-        <PaymentForm
-          bookingData={bookingData}
-          selectedSeats={selectedSeats}
-          selectedMovie={selectedMovie}
-          onPaymentSuccess={handlePaymentSuccess}
-        />
-        <button
-          className="back-btn"
-          onClick={() => setShowPaymentForm(false)}
-          style={{
-            margin: "1rem auto",
-            display: "block",
-            padding: "0.5rem 1rem",
-            background: "#6c757d",
-            color: "white",
-            border: "none",
-            borderRadius: "5px",
-            cursor: "pointer",
-          }}
-        >
-          Back to Seat Selection
-        </button>
-      </div>
-    );
-  }
+  // if (showPaymentForm) {
+  //   return (
+  //     <div className="App">
+  //       <PaymentForm
+  //         bookingData={bookingData}
+  //         selectedSeats={selectedSeats}
+  //         selectedMovie={selectedMovie}
+  //         onPaymentSuccess={handlePaymentSuccess}
+  //       />
+  //       <button
+  //         className="back-btn"
+  //         onClick={() => setShowPaymentForm(false)}
+  //         style={{
+  //           margin: "1rem auto",
+  //           display: "block",
+  //           padding: "0.5rem 1rem",
+  //           background: "#6c757d",
+  //           color: "white",
+  //           border: "none",
+  //           borderRadius: "5px",
+  //           cursor: "pointer",
+  //         }}
+  //       >
+  //         Back to Seat Selection
+  //       </button>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="App">
@@ -124,11 +153,8 @@ export default function App() {
       </p>
 
       {selectedSeats.length > 0 && (
-        <button
-          className="payment-btn"
-          onClick={() => setShowPaymentForm(true)}
-        >
-          Proceed to Payment (${selectedSeats.length * selectedMovie.price})
+        <button className="payment-btn" onClick={handleStripeCheckout}>
+          Bayar di Stripe (${selectedSeats.length * selectedMovie.price})
         </button>
       )}
     </div>
